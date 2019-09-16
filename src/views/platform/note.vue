@@ -1,0 +1,160 @@
+<template>
+    <div>
+        <div class="title">条件搜索</div>
+        <ul class="flex">
+            <li class="flex">
+                机构代码 
+                <a-input placeholder="请输入机构代码" style="width:150px ;margin-left:10px;"/>
+            </li>
+            <li class="flex">
+                机构名称
+                <a-input placeholder="请输入机构名称"  style="width:150px;margin-left:10px;"/>
+            </li>
+              <a-button icon="search"  style="margin-right:10px;" type="primary">查询</a-button>
+        </ul>  
+
+
+        <div class="title" style="margin-top:20px;">所有机构</div>
+        
+        <div style="margin-bottom:20px">
+            <a-button icon="edit"  style="margin-right:10px;">新增</a-button>
+            <a-button icon="edit"  style="margin-right:10px;">修改</a-button>
+            <a-button icon="delete"  style="margin-right:10px;">删除</a-button>
+        </div>
+        <div >
+            <a-table :rowSelection="rowSelection" :columns="columns" :dataSource="data" >
+                <a slot="name" slot-scope="text" href="javascript:;">{{text}}</a>
+            </a-table>
+        </div>
+           <a-modal
+          title="修改密码"
+          v-model="changepass_visible"
+          @ok="handleOk"
+            okText="保存"
+            cancelText="取消"
+        >
+         <ul>
+           <li class="flex" style="margin-bottom:10px;justify-content:flex-end;width:85%;  ">
+             旧密码：  <a-input placeholder="请输入旧密码：" style="width:250px ;margin-left:10px;"/>
+
+           </li>
+           <li class="flex" style="margin-bottom:10px;justify-content:flex-end ;width:85%; ">
+             新密码：  <a-input placeholder="请输入新密码：" style="width:250px ;margin-left:10px;"/>
+           </li>
+           <li class="flex" style="margin-bottom:10px;justify-content:flex-end ;width:85%;  ">
+             确认密码：  <a-input placeholder="请输入确认密码：" style="width:250px ;margin-left:10px;"/>
+           </li>
+         </ul>
+        </a-modal>
+    </div>
+</template>
+
+<script>
+const columns = [{
+  title: '机构代码',
+  dataIndex: 'name',
+  scopedSlots: { customRender: 'name' },
+}, {
+  title: '机构名称',
+  dataIndex: 'age',
+}, {
+  title: '机构分类上级',
+  dataIndex: 'address',
+},{
+  title: '机构状态',
+  dataIndex: 'address2',
+},{
+  title: '机构负责人',
+  dataIndex: 'address3',
+},{
+  title: '机构备注',
+  dataIndex: 'address4',
+}];
+const data = [{
+  key: '1',
+  name: 'John Brown',
+  age: 32,
+  address: '测试测试k',
+}, {
+  key: '2',
+  name: 'Jim Green',
+  age: 42,
+  address: '测试测试k',
+}, {
+  key: '3',
+  name: 'Joe Black',
+  age: 32,
+  address: '测试测试k',
+}, {
+  key: '3',
+  name: 'Joe Black',
+  age: 32,
+  address: '测试测试k',
+}];
+export default {
+
+  data() {
+
+    return {
+        data,
+      columns,
+    }
+  },
+ computed: {
+    rowSelection() {
+      const { selectedRowKeys } = this;
+      return {
+        onChange: (selectedRowKeys, selectedRows) => {
+          console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+        },
+        getCheckboxProps: record => ({
+          props: {
+            disabled: record.name === 'Disabled User', // Column configuration not to be checked
+            name: record.name,
+          }
+        }),
+      }
+    }
+ },
+  methods: {
+    goTo(){
+          this.$router.push({ path: "/platform" });
+    },
+  }
+}
+</script>
+
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+.title{
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom:20px;
+}
+.flex{
+    display: flex;
+    display:-webkit-flex;
+    align-items: center;
+}
+ul{
+    list-style: none;
+    padding:0;
+}
+li{
+    margin-right: 10px;
+}
+#components-layout-demo-top-side-2 .logo {
+  width: 120px;
+  height: 31px;
+  background: rgba(255,255,255,.2);
+  margin: 16px 28px 16px 0;
+  float: left;
+}
+.table-operations {
+  margin-bottom: 16px;
+}
+
+.table-operations > button {
+  margin-right: 8px;
+}
+</style>
