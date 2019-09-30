@@ -21,7 +21,7 @@
               <conditioSearch v-if="pane.key=='/transactionLink'"></conditioSearch>
           <keep-alive v-else>
             <div></div>
-            <router-view @createP="pointprotect">
+            <router-view @createP="pointprotect" @createV="preview">
 
               
             </router-view>
@@ -80,6 +80,7 @@ export default {
   mounted(){
     localStorage.removeItem('search');
     localStorage.removeItem('protect');
+    localStorage.removeItem('preview');
   },
   methods: {
     onSearch (value) {
@@ -102,6 +103,21 @@ export default {
         }else{
             this.activeKey =  localStorage.protect ;
             this.$router.push( localStorage.protect);
+        }
+    },
+    preview(){
+      if(localStorage.preview == null || localStorage.preview == 0){
+          const panes = this.panes
+          const activeKey = `/transactionLink/preview`
+          // const pagePath =  `/platform/rolemaintenance`;
+          panes.push({ title: `预览`, content: `Content of new Tab ${activeKey}`, key: activeKey })
+          this.panes = panes
+          this.activeKey = activeKey;
+          this.$router.push(activeKey);
+          localStorage.preview = activeKey;
+        }else{
+            this.activeKey =  localStorage.preview ;
+            this.$router.push( localStorage.preview);
         }
     },
     getitem(e,name){

@@ -3,10 +3,25 @@
        <headshow :items="['3']"></headshow>
     <a-layout>
       <a-layout-sider width="250" style="background: #fff">
-        <a-input-search placeholder="input search text" style="width: 230px;margin:10px" @search="onSearch"/>
-        <ul class="systemListname">
-            <li v-for="(item,index) in systemList" :key="index" :class="activeClass==index?'active':''" @click="getitem(index,item. name)"><a-icon type="desktop" />{{item.name}}</li>    
-        </ul>
+          <!-- 树形插件 -->
+          <div></div>
+          <!-- 版本管理导航 -->
+
+        <a-menu
+          theme="light"
+          mode="inline"
+          :defaultOpenKeys="['sub1','sub2','sub3','sub4','sub5']"
+          :style="{ height: '100%', borderRight: 0 }"
+        >
+          <a-sub-menu key="sub1">
+              <span slot="title"><a-icon type="user" />服务版本管理 </span>
+              <a-menu-item key="1" @click="letout">版本发布</a-menu-item>
+              <a-menu-item key="2" >版本历史</a-menu-item>
+              <a-menu-item key="3" @click="linedo" >基线制作</a-menu-item>
+              <a-menu-item key="4">基线历史</a-menu-item>
+          </a-sub-menu>
+          <a-menu-item key="5" ><a-icon type="laptop"/>接口版本管理</a-menu-item>
+        </a-menu>
       </a-layout-sider>
           <!-- 原先普通展示content -->
           <a-tabs :style="{ padding: '24px', margin: 0, minHeight: '280px',width:'100%'}"
@@ -18,12 +33,11 @@
           >
           <a-tab-pane v-for="pane in panes" :tab="pane.title" :key="pane.key" :closable="pane.closable">
             <!-- {{content}} -->
-              <conditioSearch v-if="pane.key=='/transactionLink'"></conditioSearch>
-          <keep-alive v-else>
-            <div></div>
-            <router-view>
-            </router-view>
-          </keep-alive>
+            <conditioSearch v-if="pane.key=='/servicemanage'"></conditioSearch>
+            <keep-alive v-else>
+              <router-view>
+              </router-view>
+            </keep-alive>
           </a-tab-pane>
       </a-tabs>
     </a-layout>
@@ -37,38 +51,13 @@ export default {
 
   data() {
        const panes = [
-          { title: '首页服务检测', content: '首页内容', key: '/transactionLink' }
+          { title: '服务检测', content: '首页内容', key: '/servicemanage' }
     ]
     return {
         activeClass: -1 ,
         activeKey: panes[0].key,
         panes,
         newTabIndex: 0,
-        systemList:[
-            {
-                name:'加密平台'
-            },
-            {
-                name:'理财销售系统'
-            },
-            {
-                name:'生物识别系统'
-            },
-            {
-                name:'信用卡前置系统'
-            },
-            {
-                name:'综合管理平台'
-            },
-            {
-                name:'IC卡系统'
-            },
-            
-            {
-                name:'客服信息管理'
-            }
-        ],
-      
     }
   },
   components:{
@@ -76,8 +65,9 @@ export default {
      conditioSearch
   },
   mounted(){
-    localStorage.removeItem('search');
-    localStorage.removeItem('protect');
+      localStorage.removeItem('lout');
+      localStorage.removeItem('linedo');
+
   },
   methods: {
     onSearch (value) {
@@ -86,54 +76,53 @@ export default {
     pointAdd () {   // methods方法  val即为子组件传过来的值
         
     },  
-    pointprotect(val){
-      console.log(val)
-      if(localStorage.protect == null || localStorage.protect == 0){
-          const panes = this.panes
-          const activeKey = `/transactionLink/preserve`
+    letout() {//版本发布
+       if(localStorage.lout == null || localStorage.lout == 0){
+          const panes = this.panes;
+          const activeKey = `/servicemanage/versionManger`;
           // const pagePath =  `/platform/rolemaintenance`;
-          panes.push({ title: `节点维护`, content: `Content of new Tab ${activeKey}`, key: activeKey })
+          panes.push({ title: `版本发布`, content: `Content of new Tab ${activeKey}`, key: activeKey })
           this.panes = panes
           this.activeKey = activeKey;
           this.$router.push(activeKey);
-          localStorage.protect = activeKey;
+          localStorage.lout = activeKey;
         }else{
-            this.activeKey =  localStorage.protect ;
-            this.$router.push( localStorage.protect);
+            this.activeKey =  localStorage.lout ;
+            this.$router.push( localStorage.lout);
         }
     },
-    getitem(e,name){
-        this.activeClass = e;
-        if(localStorage.search == null || localStorage.search == 0){
-        const panes = this.panes;
-        const activeKey = `/transactionLink/search`;
-        // const pagePath =  `/platform/usermaintenance`;
-        panes.push({ title:name, content: `Content of new Tab ${activeKey}`, key: activeKey});
-        this.panes = panes;
-        this.activeKey = activeKey;
-        // this.pagePath = pagePath;
-        this.$router.push(activeKey);
-        localStorage.search = activeKey;
-      }else{
-           this.activeKey =  localStorage.search ;
-          this.$router.push( localStorage.search);
-      }
+    linedo(){
+      if(localStorage.linedo == null || localStorage.linedo == 0){
+          const panes = this.panes;
+          const activeKey = `/servicemanage/lineDo`;
+          // const pagePath =  `/platform/rolemaintenance`;
+          panes.push({ title: `基线制作`, content: `Content of new Tab ${activeKey}`, key: activeKey })
+          this.panes = panes
+          this.activeKey = activeKey;
+          this.$router.push(activeKey);
+          localStorage.linedo = activeKey;
+        }else{
+            this.activeKey =  localStorage.linedo ;
+            this.$router.push( localStorage.linedo);
+        }
     },
-    goTopublic(){
-        this.$router.push({ path: "/" });
-    },
-
+  
     onEdit (targetKey, action) {
       this[action](targetKey)
     },
 
     onChange(activeKey){
-      // console.log(activeKey,33333333333333,pagePath)
       this.$router.push(activeKey)
     },
    
     remove (targetKey) {
       let activeKey = this.activeKey
+      console.log(this.activeKey)
+      if( this.activeKey == '/servicemanage/versionManger' ){
+         localStorage.removeItem('lout');
+      }else if( this.activeKey == '/servicemanage/linedo' ){
+        localStorage.removeItem('linedo');
+      }
       let lastIndex
       this.panes.forEach((pane, i) => {
         if (pane.key === targetKey) {

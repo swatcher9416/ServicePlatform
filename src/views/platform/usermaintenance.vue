@@ -4,23 +4,30 @@
         <ul class="flex">
             <li class="flex">
                 用户代码 
-                <a-input placeholder="请输入用户代码" style="width:150px ;margin-left:10px;"/>
+                <a-input placeholder="请输入用户代码" style="width:150px ;margin-left:10px;" v-model="search_id"/>
             </li>
             <li class="flex">
                 用户名称
-                <a-input placeholder="请输入用户名称"  style="width:150px;margin-left:10px;"/>
+                <a-input placeholder="请输入用户名称"  style="width:150px;margin-left:10px;" v-model="search_name"/>
             </li >
+            <li>
+              所属机构
+              <a-select style="width: 120px;margin-left:10px;"  @change="handlesearchOrgChange" v-model="search_org">
+                    <!-- <a-select-option v-for="(item,index) in select_valueList" :key="index">{{item.value}}</a-select-option> -->
+                    <a-select-option  v-for="(item,index) in orglist" :key="index" :value="item.orgId">{{item.orgName}}</a-select-option>
+                </a-select>
+
+            </li>
      
             <li class="flex">
                 用户状态
-                <a-select defaultValue="lucy" style="width: 120px;margin-left:10px;">
-                    <a-select-option value="jack" >Jack</a-select-option>
-                    <a-select-option value="lucy">Lucy</a-select-option>
-                    <a-select-option value="disabled" disabled>Disabled</a-select-option>
-                    <a-select-option value="Yiminghe">yiminghe</a-select-option>
+                <a-select style="width: 120px;margin-left:10px;"  @change="handleSearchChange" v-model="search_state">
+                    <!-- <a-select-option v-for="(item,index) in select_valueList" :key="index">{{item.value}}</a-select-option> -->
+                    <a-select-option value="0" >正在使用</a-select-option>
+                    <a-select-option value="1">已经离职</a-select-option>
                 </a-select>
-                  <a-button icon="search"  type="primary" style="margin-right:10px;margin-left:20px;">查询</a-button>
-                  <a-button icon="close" >清空</a-button>
+                  <a-button icon="search"  type="primary" style="margin-right:10px;margin-left:20px;" @click="searchUser">查询</a-button>
+                  <a-button icon="close" @click="clear">清空</a-button>
             </li>
         </ul>  
         
@@ -30,15 +37,15 @@
         
         <div style="margin-bottom:20px">
             <a-button icon="plus"  style="margin-right:10px;"  @click="showModal">新增</a-button>
-            <a-button icon="edit"  style="margin-right:10px;">修改</a-button>
-            <a-button icon="delete"  style="margin-right:10px;" @click="showConfirm">删除</a-button>
-            <a-button icon="laptop"  style="margin-right:10px;"  @click="changePass">修改密码</a-button>
-            <a-button icon="laptop"  style="margin-right:10px;">初始化密码</a-button>
+            <a-button icon="edit"  style="margin-right:10px;"  @click="openchange" :disabled="ischangeone==0? true:false">修改</a-button>
+            <a-button icon="delete"  style="margin-right:10px;" @click="showConfirm" :disabled="ischoose==0?true:false">删除</a-button>
+            <a-button icon="laptop"  style="margin-right:10px;"  @click="changePass" :disabled="ischangepassone==0?true:false">修改密码</a-button>
+            <a-button icon="laptop"  style="margin-right:10px;" :disabled="isintpassone==0?true:false">初始化密码</a-button>
         </div>
         <a-modal
-            title="新增用户"
+            :title="title"
             :visible="visible"
-            @ok="handleOk"
+            @ok="add_user"
             @cancel="handleCancel"
             okText="保存"
             cancelText="取消"
@@ -47,38 +54,44 @@
             <div>
               <div class="graybox">
                   <ul class="flex" style="width:100%; flex-wrap:wrap">
-                    <li class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end ">
-                        用户代码
-                         <a-input placeholder="请输入用户代码" style="width:250px ;margin-left:10px;"/>
+                    <li class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end ">用户代码    <a-input placeholder="请输入用户代码" style="width:250px ;margin-left:10px;" v-model="user_id"/></li>
+                    <li  class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end">用户名称   <a-input placeholder="请输入用户代码" style="width:250px ;margin-left:10px;"  v-model="user_code"/></li>
+                    <li  class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end">手机号码   <a-input placeholder="请输入手机号码" style="width:250px ;margin-left:10px;"  v-model="cellphone"/></li>
+                    <li  class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end">电话号码   <a-input placeholder="请输入电话号码" style="width:250px ;margin-left:10px;"  v-model="telphone"/></li>
+                    <li  class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end">电子邮箱   <a-input placeholder="请输入电子邮箱" style="width:250px ;margin-left:10px;"  v-model="email"/></li>
+                    <li  class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end"> 
+                        所选机构
+                        <a-select  style="width: 250px;margin-left:10px;" @change="handleOrgChange" v-model="orgSelect">
+                          <a-select-option  v-for="(item,index) in orglist" :key="index" :value="item.orgId">{{item.orgName}}</a-select-option>
+                        </a-select>
                     </li>
-                    <li  class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end  ">用户名称   <a-input placeholder="请输入用户代码" style="width:250px ;margin-left:10px;"/></li>
-                    <li  class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end  ">手机号码   <a-input placeholder="请输入用户代码" style="width:250px ;margin-left:10px;"/></li>
-                    <li  class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end  ">电话号码   <a-input placeholder="请输入用户代码" style="width:250px ;margin-left:10px;"/></li>
-                    <li  class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end  ">电子邮箱   <a-input placeholder="请输入用户代码" style="width:250px ;margin-left:10px;"/></li>
-                    <li  class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end  ">所属机构   <a-input placeholder="请输入用户代码" style="width:250px ;margin-left:10px;"/></li>
-                    <li  class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end  ">密码       <a-input placeholder="请输入用户代码" style="width:250px ;margin-left:10px;"/></li>
-                    <li  class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end  ">用户状态   <a-input placeholder="请输入用户代码" style="width:250px ;margin-left:10px;"/></li>
-                    <li  class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end  ">备注       <a-input placeholder="请输入用户代码" style="width:250px ;margin-left:10px;"/></li>
+                    <li  class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end">密码 <a-input placeholder="请输入密码" style="width:250px ;margin-left:10px;"  v-model="password"/></li>
+                    <li  class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end">状态  
+                       <a-select defaultValue="" style="width: 250px;margin-left:10px;" @change="handleStateChange" v-model="stateSelect">
+                          <a-select-option value="0">正在使用</a-select-option>
+                          <a-select-option value="1">已经离职</a-select-option>
+                        </a-select>
+                    </li>
+                    <li  class="flex" style="width:45%;margin-bottom:10px;justify-content:flex-end">备注<a-input placeholder="请输入备注" style="width:250px ;margin-left:10px;" v-model="remark"/></li>
                   </ul>
               </div>
               <div class="graybox">
-                  <a-table :rowSelection="rowSelection" :columns="columns_modal" :dataSource="data">
+                  <a-table :rowSelection="lrowSelection" :columns="columns_modal" :dataSource="roleList">
                     <a slot="name" slot-scope="text" href="javascript:;">{{text}}</a>
                   </a-table>
               </div>
-            </div>
+            </div>  
         </a-modal>
         <a-modal
           title="修改密码"
           v-model="changepass_visible"
           @ok="handleOk"
-            okText="保存"
-            cancelText="取消"
+          okText="保存"
+          cancelText="取消"
         >
          <ul>
            <li class="flex" style="margin-bottom:10px;justify-content:flex-end;width:85%;  ">
              旧密码：  <a-input placeholder="请输入旧密码：" style="width:250px ;margin-left:10px;"/>
-
            </li>
            <li class="flex" style="margin-bottom:10px;justify-content:flex-end ;width:85%; ">
              新密码：  <a-input placeholder="请输入新密码：" style="width:250px ;margin-left:10px;"/>
@@ -100,90 +113,161 @@
 </template>
 
 <script>
+import { getAllUser,addUser,getAllRole,getAllOrg,deleteUser,editUser, editOrg,searchquery,assignRoles } from "../../api/interface"
 
-
-
-
-const columns_modal=[{
+const columns_modal=[{//新增用户内的表格的表头数据
    title: '角色名',
   dataIndex: 'name',
   scopedSlots: { customRender: 'name' },
 }]
 
-const columns = [{
+const columns = [{//新增用户的表格表头
   title: '用户代码',
-  dataIndex: 'name',
-  scopedSlots: { customRender: 'name' },
+  dataIndex: 'id',
+  scopedSlots: { customRender: 'name' },  
 }, {
   title: '用户名称',
-  dataIndex: 'age',
+  dataIndex: 'name',
 }, {
   title: '手机号码',
   dataIndex: 'phone',
 }, {
   title: '电话号码',
-  dataIndex: 'tel',
+  dataIndex: 'userMobile',
 }, {
   title: '所在系统',
-  dataIndex: 'system',
+  dataIndex: 'sysId',
 }, {
   title: '所属机构',
-  dataIndex: 'jigou',
+  dataIndex: 'orgName',
 }, {
   title: '电子邮箱',
   dataIndex: 'email',
 }, {
   title: '用户状态',
-  dataIndex: 'state',
+  dataIndex: 'status',
 }, {
   title: '角色',
-  dataIndex: 'role',
+  dataIndex: 'roleNames',
 }, {
   title: '备注',
-  dataIndex: 'other',
+  dataIndex: 'remark',
 }];
-const data = [{
-  key: '1',
-  name: 'John Brown',
-  age: 32,
-  address: '测试测试k',
-}, {
-  key: '2',
-  name: 'Jim Green',
-  age: 42,
-  address: '测试测试k',
-}, {
-  key: '3',
-  name: 'Joe Black',
-  age: 32,
-  address: '测试测试k',
-}, {
-  key: '4',
-  name: 'Disabled User',
-  age: 99,
-  address: '测试测试k',
-}];
+
 export default {
  name: "usertable",
  props: ["item"],
-
   data() {
-
     return {
-        data,
-      columns,columns_modal,  
-       ModalText: 'Content of the modal',
-       visible: false,
-       changepass_visible:false,
+      data:[],
+      columns,
+      columns_modal,  
+      ModalText: 'Content of the modal',
+      visible: false,
+      changepass_visible:false,
       confirmLoading: false,
+       //新增用户的几个参数start
+      user_id:'',
+      user_code:'',
+      cellphone:'',
+      telphone:'',
+      email:'',
+      org:'',
+      password:'',
+      state:'',
+      remark:'',
+      password:'',
+      //新增用户的几个参数end
+      ischangeone:0,
+      title:'新增用户',
+      ischangepassone:0,
+      isintpassone:0,
+      roleList:[],
+      orglist:[],
+      ischoose:0,
+      add_click:0,
+      edit_click:0,
+      //状态选择绑定
+      stateSelect:'',
+      //机构选择绑定
+      orgSelect:'',
+      //搜索框条件
+      search_id:'',
+      search_name:'',
+      search_org:'',
+      search_state:'',
+      delArray:'',
+      addRole:''
     }
   },
+  created(){
+      this.get_AllUser();
+  },
  computed: {
-    rowSelection() {
+    rowSelection() {//绑定的是外面列表,选择前面的行
+      var  self = this;
       const { selectedRowKeys } = this;
       return {
         onChange: (selectedRowKeys, selectedRows) => {
           console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+          self.delArray= '';
+          if(selectedRows.length == 0){
+            self.ischoose = 0;
+          }else{
+            self.ischoose = 1;
+          }
+          for(var i in selectedRows){
+              self.delArray += selectedRows[i].id + ',';//选中的选项值拼成字符串
+          }
+          console.log(self.delArray)
+          if(selectedRows.length == 1){//如果只选了一个的时候
+              this.ischangeone = 1;
+              this.ischangepassone = 1;
+              this.isintpassone = 1;
+              this.user_id = selectedRows[0].id;//id
+              this.user_code = selectedRows[0].name;//名称
+     
+              this.orgSelect =  selectedRows[0].orgId ; //机构
+              console.log( '现在的机构是'+this.orgSelect )
+
+              this.password = selectedRows[0].password;
+              this.cellphone = selectedRows[0].userMobile;
+              this.telphone = selectedRows[0].userTel;
+              this.email = selectedRows[0].email;
+              this.stateSelect =  selectedRows[0].status;
+              // if(selectedRows[0].status=="0"){
+              //     this.stateSelect = "正常使用";
+              // }else{
+              //     this.stateSelect = "已经离职";
+              // }
+              // this.stateSelect = selectedRows[0].status;
+              console.log( '现在的状态是'+this.stateSelect )
+              this.remark = selectedRows[0].remark;
+          }else{
+              this.ischangeone = 0;
+              this.ischangepassone = 0;
+              this.isintpassone = 0
+          } 
+        },
+        getCheckboxProps: record => ({
+          props: {
+            disabled: record.name === 'Disabled User', // Column configuration not to be checked
+            name: record.name,
+          }
+        }),
+      }
+    },
+    lrowSelection(){//这里的计算方法与修改用户弹窗里面的表格相关联，不要和外面搞混噢
+      var  self = this;
+      const { selectedRowKeys } = this;
+      return {
+        onChange: (selectedRowKeys, selectedRows) => {
+          console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+          self.addRole= '';
+          for(var i in selectedRows){
+              self.addRole += selectedRows[i].id + ',';//选中的选项值拼成字符串
+          }
+          console.log(self.addRole)
         },
         getCheckboxProps: record => ({
           props: {
@@ -194,12 +278,168 @@ export default {
       }
     }
  },
+ mounted(){
+   var self = this;
+    getAllRole({//获取角色列表
+      pageNo:1,
+      pageSize:10
+    }).then(res => {
+      console.log(res)
+      if(res.returnCode==200){
+        self.roleList=res.data;
+      }
+    });
+    getAllOrg({//获取机构
+      pageNo:1,
+      pageSize:10
+    }).then(res => {
+      console.log(res)
+      self.orglist = res.data.rows;
+      console.log(self.orglist)
+    });
+ },
   methods: {
-    goTo(){
-          this.$router.push({ path: "/platform" });
+    searchUser(){
+      var self = this;
+      searchquery({ 
+        id:self.search_id,
+        name:self.search_name,
+        orgId:self.search_org,
+        status:self.search_state
+      }).then(res => {
+          console.log(res);
+          if(res.returnCode == 200){//查询成功
+           for(var i in res.data){
+              if(res.data[i].status==0){
+                res.data[i].status = "正在使用";
+              }else{
+                  res.data[i].status = "已经离职";
+              }
+            }
+            self.data  = res.data ;
+          }else if(res.returnCode == 404){//查询失败
+            self.$message.info('未找到用户信息');
+          }
+        });
     },
-     showModal() {
-      this.visible = true
+    get_AllUser(){
+      var self = this;
+      getAllUser({
+          pageNo:1,
+          rows:10
+      }).then(res => {
+        console.log(res);
+        console.log(self.data,111);
+        if(res.returnCode==200){
+            for(var i in res.data.rows){
+              if(res.data.rows[i].status==0){
+                res.data.rows[i].status = "正在使用";
+              }else{
+                  res.data.rows[i].status = "已经离职";
+              }
+            }
+            self.data = res.data.rows;
+        }
+      });
+    },
+    clear(){//清空搜索条件
+      this.search_id='';
+      this.search_name='';
+      this.search_state='';
+    },
+    handleSearchChange(value){
+      console.log(`selected ${value}`);
+    },
+    handleOrgChange(value) {//选中的机构值
+      this.org = `${value}`;
+    },
+    handlesearchOrgChange(value){
+      console.log( this.search_org,20313123)
+      this.search_org= `${value}`;
+    },
+    handleStateChange(value){//选中状态值
+      this.state = `${value}`;
+    },
+    openchange(){//打开修改角色的框
+      this.title= '修改角色'
+      this.visible = true; 
+      this.edit_click = 1;
+      this.add_click = 0;
+    },
+    edit_User(){//点击保存修改用户
+      var self = this;
+      editUser({
+        id:self.user_id,
+        name:self.user_code,
+        orgId:self.org,
+        password:self.password,
+        userMobile:self.cellphone,
+        userTel:self.telphone,
+        email:self.email,
+        status:self.state,
+        remark:self.remark
+      }).then(res => {
+        if(res.returnCode==200){
+            self.visible=false;//添加完毕关闭弹窗
+            setTimeout(function(){  
+              self.get_AllUser();
+            },100)
+        }
+      });
+    },
+    add_user(){//点击保存新增用户
+      var self = this;
+      var tmp = self.addRole;
+      tmp = tmp.substring(0,tmp.length-1);
+      if(self.add_click == 1 && self.edit_click == 0){//添加用户
+        addUser({
+          id:self.user_id,
+          name:self.user_code,
+          orgId:self.org,
+          password:self.password,
+          userMobile:self.cellphone,
+          userTel:self.telphone,
+          email:self.email,
+          status:self.state,
+          remark:self.remark
+        }).then(res => {
+          if(res.returnCode==200){
+                assignRoles({
+                    userId:self.user_id,
+                    roleId:tmp
+                }).then(res=>{
+                    if(res.returnCode==200){
+
+                    }
+                });
+
+              self.visible=false;//添加完毕关闭弹窗
+              setTimeout(function(){  
+                self.get_AllUser();
+              },100)
+          }
+        });
+      }else if(self.add_click == 0 && self.edit_click == 1){//修改用户
+          self.edit_User();
+      }
+     
+
+    },
+    showModal() {
+      this.visible = true;
+      this.edit_click = 0;
+      this.add_click = 1;
+      //重置
+      this.user_id='';
+      this.user_code='';
+      this.org='';
+      this.password='';
+      this.cellphone='';
+      this.telphone='';
+      this.email='';
+      // this.state='';
+      this.stateSelect= '';
+      this.remark='';
     },
     handleOk(e) {
       this.ModalText = 'The modal will be closed after two seconds';
@@ -213,11 +453,43 @@ export default {
       console.log('Clicked cancel button');
       this.visible = false
     },
-    showConfirm() {
+    userDelete(){//用户删除方法
+      var self = this;
+      var tmp = self.delArray;
+      tmp = tmp.substring(0,tmp.length-1);//去除字符串最后面的逗号
+      deleteUser({
+        id:tmp
+      }).then(res=>{
+          console.log(res)
+          setTimeout(function(){
+            getAllUser({
+                  pageNo:1,
+                  rows:10
+              }).then(res => {
+                  console.log(res);
+                  if(res.returnCode==200){
+                    for(var i in res.data.rows){
+                      if(res.data.rows[i].status == 0){
+                        res.data.rows[i].status = "正在使用";
+                      }else{
+                        res.data.rows[i].status = "已经离职";
+                      }
+                    }
+                  self.data = res.data.rows;
+
+                  }
+                  console.log(self.data,111)
+                });
+          },1000)
+      })
+    },
+    showConfirm() {//删除
+      var self = this;
       this.$confirm({
         title: '提示',
         content: '确定要删除该数据？',
         onOk() {
+          self.userDelete();
           return new Promise((resolve, reject) => {
             setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
           }).catch(() => console.log('Oops errors!'));

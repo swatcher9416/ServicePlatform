@@ -32,7 +32,8 @@
           >
           <a-tab-pane v-for="pane in panes" :tab="pane.title" :key="pane.key" :closable="pane.closable">
             <!-- {{content}} -->
-          <keep-alive>
+          <conditioSearch v-if="pane.key=='/myworkspace'"></conditioSearch>
+          <keep-alive v-else>
             <router-view></router-view>
           </keep-alive>
           </a-tab-pane>
@@ -53,11 +54,12 @@
 
 <script>
 import headshow from '../../components/menu.vue'
+import conditioSearch from '../../components/conditioSearch.vue'
 export default {
 
   data() {
        const panes = [
-      { title: '首页服务检测', content: '首页内容', key: '1' }
+      { title: '服务检测', content: '首页内容', key: '/myworkspace' }
     ]
     return {
       activeKey: panes[0].key,
@@ -66,7 +68,8 @@ export default {
     }
   },
   components:{
-    headshow
+    headshow,
+    conditioSearch
   },
   computed: {
   

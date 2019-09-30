@@ -35,7 +35,7 @@
         <div class="title" style="margin-top:20px;">交易节点</div>
             
         <div style="margin-bottom:20px">
-            <a-button icon="search"  style="margin-right:10px;">预览</a-button>
+            <a-button icon="search"  style="margin-right:10px;" @click="preview">预览</a-button>
             <a-button icon="edit"    style="margin-right:10px;">血缘分析</a-button>
             <a-button icon="delete"  style="margin-right:10px;">导出调用关系</a-button>
             <a-button icon="laptop"  style="margin-right:10px;" @click="showModal">导入调用关系</a-button>
@@ -147,6 +147,10 @@ export default {
     preserve(){
       console.log('节点维护');
       this.$emit('createP','我要创建一个东西')
+    },
+    preview(){
+      console.log('预览');
+      this.$emit('createV','我要创建一个东西')
     }
   }
 }

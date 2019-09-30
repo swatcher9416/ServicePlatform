@@ -1,23 +1,9 @@
 <template>
     <div>
-        <div class="title">条件搜索</div>
-        <ul class="flex">
-            <li class="flex">
-                机构代码 
-                <a-input placeholder="请输入机构代码" style="width:150px ;margin-left:10px;"/>
-            </li>
-            <li class="flex">
-                机构名称
-                <a-input placeholder="请输入机构名称"  style="width:150px;margin-left:10px;"/>
-            </li>
-              <a-button icon="search"  style="margin-right:10px;" type="primary">查询</a-button>
-        </ul>  
-
-
-        <div class="title" style="margin-top:20px;">所有机构</div>
+        <div class="title" style="margin-top:20px;">所有生成类</div>
         
         <div style="margin-bottom:20px">
-            <a-button icon="edit"  style="margin-right:10px;">新增</a-button>
+            <a-button icon="edit"  style="margin-right:10px;" @click="open_add">新增</a-button>
             <a-button icon="edit"  style="margin-right:10px;">修改</a-button>
             <a-button icon="delete"  style="margin-right:10px;">删除</a-button>
         </div>
@@ -26,59 +12,72 @@
                 <a slot="name" slot-scope="text" href="javascript:;">{{text}}</a>
             </a-table>
         </div>
+         <a-modal
+            :title="title"
+             v-model="add_visible"
+            @ok="add_Generator"
+            okText="保存"
+              keyboard:false
+            cancelText="取消"
+            width='450px'
+            >
+            <div>
+              <div class="graybox">
+                  <ul >
+                    <li  class="flex"  style="margin-bottom:10px;justify-content:flex-end;width:85%;">拆租包模式<a-input placeholder="请输入拆租包模式" style="width:250px ;margin-left:10px;"  v-model="type"/></li>
+                    <li  class="flex"  style="margin-bottom:10px;justify-content:flex-end;width:85%;">描述<a-input placeholder="请输入描述" style="width:250px ;margin-left:10px;"  v-model="desc"/></li>
+                    <li  class="flex"  style="margin-bottom:10px;justify-content:flex-end;width:85%;">生成器类型<a-input placeholder="请输入角色描述" style="width:250px ;margin-left:10px;"  v-model="classf"/></li>
+                    <li  class="flex"  style="margin-bottom:10px;justify-content:flex-end;width:85%;">
+                      类路径
+                      <a-input placeholder="请输入角色描述" style="width:250px ;margin-left:10px;"  v-model="path"/>
+                    </li>
+                  </ul>
+              </div>
+            </div>
+        </a-modal>
     </div>
 </template>
 
 <script>
+
+import { addGenerator , getGeneratorList} from "../../api/interface"
+
 const columns = [{
-  title: '机构代码',
+  title: '拆租包模式',
   dataIndex: 'name',
   scopedSlots: { customRender: 'name' },
 }, {
-  title: '机构名称',
-  dataIndex: 'age',
+  title: '描述',
+  dataIndex: 'desc',
 }, {
-  title: '机构分类上级',
-  dataIndex: 'address',
+  title: '生成器类型',
+  dataIndex: 'generatorType',
 },{
-  title: '机构状态',
-  dataIndex: 'address2',
-},{
-  title: '机构负责人',
-  dataIndex: 'address3',
-},{
-  title: '机构备注',
-  dataIndex: 'address4',
+  title: '类路径',
+  dataIndex: 'implementsClazz',
 }];
-const data = [{
-  key: '1',
-  name: 'John Brown',
-  age: 32,
-  address: '测试测试k',
-}, {
-  key: '2',
-  name: 'Jim Green',
-  age: 42,
-  address: '测试测试k',
-}, {
-  key: '3',
-  name: 'Joe Black',
-  age: 32,
-  address: '测试测试k',
-}, {
-  key: '3',
-  name: 'Joe Black',
-  age: 32,
-  address: '测试测试k',
-}];
+
 export default {
 
   data() {
-
     return {
-        data,
+      data:[],
       columns,
+      // name:'',
+      // desc:'',
+      // generatorType:'',
+      // implementsClazz:'',
+      title:'新增生成类',
+      add_visible:false,
+      type:'',
+      desc:'',
+      classf:'',
+      path:''
+
     }
+  },
+  mounted(){
+    this.get_Generator ();
   },
  computed: {
     rowSelection() {
@@ -97,9 +96,31 @@ export default {
     }
  },
   methods: {
-    goTo(){
-          this.$router.push({ path: "/platform" });
+    open_add(){
+        this.add_visible = true;
+        this.title = '新增生成类';
     },
+    get_Generator(){
+      var self = this;
+      getGeneratorList(undefined).then(res=>{
+        if(res.returnCode==200){
+          self.data = res.data;
+        }
+      });
+    },
+    add_Generator(){
+      var self = this;
+      addGenerator({
+        name:self.name,
+        desc:self.desc,
+        generatorType:self.classf,
+        implementsClazz:self.path,
+      }).then(res=>{
+        if(res.returnCode==200){//添加成功
+          self.add_visible = false;
+        }
+      })
+    }
   }
 }
 </script>

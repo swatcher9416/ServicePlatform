@@ -3,100 +3,69 @@
         <div class="title">条件搜索</div>
         <ul class="flex">
             <li class="flex">
-                机构代码 
-                <a-input placeholder="请输入机构代码" style="width:150px ;margin-left:10px;"/>
+                操作人 
+                <a-input placeholder="请输入操作人" style="width:150px ;margin-left:10px;"/>
             </li>
             <li class="flex">
-                机构名称
-                <a-input placeholder="请输入机构名称"  style="width:150px;margin-left:10px;"/>
+              
+               <a-range-picker @change="onChange" />
+
             </li>
               <a-button icon="search"  style="margin-right:10px;" type="primary">查询</a-button>
+              <a-button icon="search"  style="margin-right:10px;" type="primary">清空</a-button>
         </ul>  
 
 
-        <div class="title" style="margin-top:20px;">所有机构</div>
+        <div class="title" style="margin-top:20px;">日志列表</div>
         
-        <div style="margin-bottom:20px">
+        <!-- <div style="margin-bottom:20px">
             <a-button icon="edit"  style="margin-right:10px;">新增</a-button>
             <a-button icon="edit"  style="margin-right:10px;">修改</a-button>
             <a-button icon="delete"  style="margin-right:10px;">删除</a-button>
-        </div>
+        </div> -->
         <div >
             <a-table :rowSelection="rowSelection" :columns="columns" :dataSource="data" >
                 <a slot="name" slot-scope="text" href="javascript:;">{{text}}</a>
             </a-table>
         </div>
-           <a-modal
-          title="修改密码"
-          v-model="changepass_visible"
-          @ok="handleOk"
-            okText="保存"
-            cancelText="取消"
-        >
-         <ul>
-           <li class="flex" style="margin-bottom:10px;justify-content:flex-end;width:85%;  ">
-             旧密码：  <a-input placeholder="请输入旧密码：" style="width:250px ;margin-left:10px;"/>
-
-           </li>
-           <li class="flex" style="margin-bottom:10px;justify-content:flex-end ;width:85%; ">
-             新密码：  <a-input placeholder="请输入新密码：" style="width:250px ;margin-left:10px;"/>
-           </li>
-           <li class="flex" style="margin-bottom:10px;justify-content:flex-end ;width:85%;  ">
-             确认密码：  <a-input placeholder="请输入确认密码：" style="width:250px ;margin-left:10px;"/>
-           </li>
-         </ul>
-        </a-modal>
+      
     </div>
 </template>
 
 <script>
+
+import { getsystemLog } from "../../api/interface"
+
 const columns = [{
-  title: '机构代码',
-  dataIndex: 'name',
-  scopedSlots: { customRender: 'name' },
+  title: '用户账号',
+  dataIndex: 'optUser',
+  scopedSlots: { customRender: 'optUser' },
 }, {
-  title: '机构名称',
-  dataIndex: 'age',
+  title: '用户名称',
+  dataIndex: 'optUser',
 }, {
-  title: '机构分类上级',
-  dataIndex: 'address',
+  title: '操作对象',
+  dataIndex: 'chineseName',
+},
+ {
+  title: '操作类型',
+  dataIndex: 'optType',
 },{
-  title: '机构状态',
-  dataIndex: 'address2',
+  title: '操作内容',
+  dataIndex: 'params',
 },{
-  title: '机构负责人',
-  dataIndex: 'address3',
+  title: '结果',
+  dataIndex: 'optResult',
 },{
-  title: '机构备注',
-  dataIndex: 'address4',
+  title: '操作时间',
+  dataIndex: 'optDate',
 }];
-const data = [{
-  key: '1',
-  name: 'John Brown',
-  age: 32,
-  address: '测试测试k',
-}, {
-  key: '2',
-  name: 'Jim Green',
-  age: 42,
-  address: '测试测试k',
-}, {
-  key: '3',
-  name: 'Joe Black',
-  age: 32,
-  address: '测试测试k',
-}, {
-  key: '3',
-  name: 'Joe Black',
-  age: 32,
-  address: '测试测试k',
-}];
+
 export default {
 
   data() {
-
     return {
-        data,
+      data:[],
       columns,
     }
   },
@@ -116,10 +85,27 @@ export default {
       }
     }
  },
+ created(){
+   this.get_systemLog()
+ },
   methods: {
-    goTo(){
-          this.$router.push({ path: "/platform" });
-    },
+    get_systemLog(){
+        var self = this;
+        getsystemLog({
+          pageNo:1,
+          pageSize:10,
+          optUser:'',
+          startDate:'',
+          endDate:''
+        }).then(res=>{
+          if(res.returnCode==200){
+            self.data = res.data.rows
+          }
+        })
+      },
+    onChange(date, dateString) {
+      console.log(date, dateString);
+    }
   }
 }
 </script>

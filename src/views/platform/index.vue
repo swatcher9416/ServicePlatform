@@ -10,7 +10,7 @@
         >
           <a-sub-menu key="sub1">
               <span slot="title"><a-icon type="user" />权限管理</span>
-              <a-menu-item key="1">菜单管理</a-menu-item>
+              <a-menu-item key="1" @click="gomenu">菜单管理</a-menu-item>
               </a-sub-menu>
           <a-sub-menu key="sub2">
               <span slot="title"><a-icon type="laptop" />用户管理</span>
@@ -23,15 +23,10 @@
               <span slot="title"><a-icon type="notification" />日志管理</span>
               <a-menu-item key="5"  @click="gonote">系统日志</a-menu-item>
           </a-sub-menu>
-          <a-sub-menu key="sub4">
-              <span slot="title"><a-icon type="notification"   @click="goclassify"/>生成类管理</span>
-          </a-sub-menu>
-          <a-sub-menu key="sub5">
-              <span slot="title"><a-icon type="notification"   @click="goesb"/>ESB管理</span>
-          </a-sub-menu>
-          <a-sub-menu key="sub6">
-              <span slot="title"><a-icon type="notification"   @click="goword"/>字段处理办法</span>
-          </a-sub-menu>
+           <a-menu-item key="sub4" @click="goclassify"><a-icon type="notification"/>生成类管理</a-menu-item>
+           <a-menu-item key="sub5" @click="goesb"><a-icon type="notification"/>ESB管理</a-menu-item>
+       
+           <a-menu-item key="sub6" @click="goword"><a-icon type="laptop"/>字段处理办法</a-menu-item>
         </a-menu>
       </a-layout-sider>
           <!-- 原先普通展示content -->
@@ -44,22 +39,13 @@
           >
           <a-tab-pane v-for="pane in panes" :tab="pane.title" :key="pane.key" :closable="pane.closable">
             <!-- {{content}} -->
-          <keep-alive>
-            <router-view></router-view>
+            <conditioSearch v-if="pane.key=='/platform'"></conditioSearch>
+          <keep-alive v-else>
+            
+            <router-view ></router-view>
           </keep-alive>
           </a-tab-pane>
-      </a-tabs>
-      
-      
-
-<!--       
-            <a-layout :style="{ padding: '24px'}">
-        <a-layout-content :style="{ background: '#fff', padding: '24px', margin: 0, minHeight: '280px' }">  
-      
-
-          <router-view></router-view>
-        </a-layout-content>
-      </a-layout> -->
+      </a-tabs> 
     </a-layout>
   </a-layout>
 
@@ -68,11 +54,13 @@
 
 <script>
 import headshow from '../../components/menu.vue'
+import conditioSearch from '../../components/conditioSearch.vue'
+
 export default {
 
   data() {
     const panes = [
-      { title: '首页服务检测', content: '首页内容', key: '1' }
+      { title: '服务检测', content: '首页内容', key: '/platform' }
     ]
     return {
       activeKey: panes[0].key,
@@ -81,10 +69,20 @@ export default {
     }
   },
   components:{
-    headshow
+    headshow,
+    conditioSearch
   },
   computed: {
   
+  },
+  mounted(){
+        localStorage.removeItem('userm');
+        localStorage.removeItem('rolem');
+        localStorage.removeItem('insm');
+        localStorage.removeItem('pword');
+        localStorage.removeItem('pesb');
+        localStorage.removeItem('pnote');
+         localStorage.removeItem('pclassify ');
   },
   methods: {
     //  add () {
@@ -136,7 +134,7 @@ export default {
     goinsm(){
       if(localStorage.insm == null || localStorage.insm == 0){
         const panes = this.panes
-        const activeKey = `newTab${this.newTabIndex++}`
+        const activeKey = `/platform/institutions`
         panes.push({ title: `机构管理`, content: `Content of new Tab ${activeKey}`, key: activeKey })
         this.panes = panes
         this.activeKey = activeKey
@@ -152,42 +150,88 @@ export default {
     },
 
     gonote(){
-      const panes = this.panes
-      const activeKey = `newTab${this.newTabIndex++}`
-      panes.push({ title: `系统日志`, content: `Content of new Tab ${activeKey}`, key: activeKey })
-      this.panes = panes
-      this.activeKey = activeKey
+    if(localStorage.pnote == null || localStorage.pnote == 0){
+        const panes = this.panes
+        const activeKey = `/platform/note`
+        panes.push({ title: `系统日志`, content: `Content of new Tab ${activeKey}`, key: activeKey })
+        this.panes = panes
+        this.activeKey = activeKey
+
+        this.$router.push( "/platform/note")
+        localStorage.pnote = activeKey;
+
+      }
+      else{
+          this.activeKey =  localStorage.pnote ;
+          this.$router.push( localStorage.pnote);
+      }
       
-      this.$router.push( "/platform/note")
-        localStorage.note = activeKey;
-      
+    },
+    gomenu(){
+      if(localStorage.pmenu == null||localStorage.pmenu==0){
+        const panes = this.panes
+        const activeKey = `/platform/menu`
+        panes.push({ title: `菜单管理`, content: `Content of new Tab ${activeKey}`, key: activeKey })
+        this.panes = panes
+        this.activeKey = activeKey
+        this.$router.push( "/platform/menu")
+        localStorage.pmenu = activeKey;
+      }
+       else{
+          this.activeKey =  localStorage.pmenu ;
+          this.$router.push( localStorage.pmenu);
+      }
     },
     goclassify(){
-      const panes = this.panes
-      const activeKey = `newTab${this.newTabIndex++}`
-      panes.push({ title: `生成类管理`, content: `Content of new Tab ${activeKey}`, key: activeKey })
-      this.panes = panes
-      this.activeKey = activeKey
-      
-      this.$router.push( "/platform/classify")
+       if(localStorage.pclassify == null || localStorage.pclassify == 0){
+        const panes = this.panes
+        const activeKey = `/platform/classify`
+        panes.push({ title: `生成类管理`, content: `Content of new Tab ${activeKey}`, key: activeKey })
+        this.panes = panes
+        this.activeKey = activeKey
+
+        this.$router.push( "/platform/classify")
+        localStorage.pclassify = activeKey;
+
+      }
+      else{
+          this.activeKey =  localStorage.pclassify ;
+          this.$router.push( localStorage.pclassify);
+      }
+
     },
     goesb(){
-      const panes = this.panes
-      const activeKey = `newTab${this.newTabIndex++}`
-      panes.push({ title: `esb服务管理`, content: `Content of new Tab ${activeKey}`, key: activeKey })
-      this.panes = panes
-      this.activeKey = activeKey
-      
-      this.$router.push( "/platform/esb")
+      if(localStorage.pesb == null || localStorage.pesb == 0){
+        const panes = this.panes
+        const activeKey = `/platform/esb`
+        panes.push({ title: `esb服务管理`, content: `Content of new Tab ${activeKey}`, key: activeKey })
+        this.panes = panes
+        this.activeKey = activeKey
+
+        this.$router.push( "/platform/esb")
+        localStorage.pesb = activeKey;
+
+      }
+      else{
+          this.activeKey =  localStorage.pesb ;
+          this.$router.push( localStorage.pesb);
+      }
     },
     goword(){
-      const panes = this.panes
-      const activeKey = `newTab${this.newTabIndex++}`
-      panes.push({ title: `字段处理方法`, content: `Content of new Tab ${activeKey}`, key: activeKey })
-      this.panes = panes
-      this.activeKey = activeKey
-      
-      this.$router.push( "/platform/word")
+     if(localStorage.pword == null || localStorage.pword == 0){
+        const panes = this.panes
+        const activeKey = `/platform/word`
+        panes.push({ title: `字段处理方法`, content: `Content of new Tab ${activeKey}`, key: activeKey })
+        this.panes = panes
+        this.activeKey = activeKey;
+        this.$router.push( "/platform/word")
+        localStorage.pword = activeKey;
+
+      }
+      else{
+          this.activeKey =  localStorage.pword ;
+          this.$router.push( localStorage.pword);
+      }
     },
     
      onEdit (targetKey, action) {

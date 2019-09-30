@@ -82,6 +82,10 @@ const router= new Router({
       component: () => import("./views/platform/index.vue"),//******平台管理********//
       children:[
         {
+          path: 'menu',
+          component: () => import("./views/platform/menu.vue")//用户维护
+        },
+        {
           path: 'usermaintenance',
           component: () => import("./views/platform/usermaintenance.vue")//用户维护
         },
@@ -197,6 +201,10 @@ const router= new Router({
         {
           path: 'preserve',
           component: () => import("./views/transactionLink/preserve.vue")//节点维护
+        },
+        {
+          path: 'preview',
+          component: () => import("./views/transactionLink/preview.vue")//预览
         }
       ]
     },
@@ -205,7 +213,14 @@ const router= new Router({
       name:'servicemanage',
       component: () => import("./views/servicemanage/index.vue"),//******服务管理********//
       children:[
-        
+        {
+          path: 'versionManger',
+          component: () => import("./views/servicemanage/versionManger/index.vue"),//版本管理
+        },
+        {
+          path: 'lineDo',
+          component: () => import("./views/servicemanage/versionManger/linedo.vue"),//基线制作
+        },
       ]
     }
   ]
