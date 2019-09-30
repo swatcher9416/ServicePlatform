@@ -22,63 +22,91 @@
         <div class="title" style="margin-top:20px;">所有角色</div>
         
         <div style="margin-bottom:20px">
-            <a-button icon="edit"  style="margin-right:10px;">新增</a-button>
-            <a-button icon="edit"  style="margin-right:10px;">修改</a-button>
-            <a-button icon="delete"  style="margin-right:10px;">删除</a-button>
-            <a-button icon="laptop"  style="margin-right:10px;">权限分配</a-button>
+            <a-button icon="plus"  style="margin-right:10px;" @click="add_open">新增</a-button>
+            <a-button icon="edit"  style="margin-right:10px;"  @click="openchange" :disabled="ischangeone==0? true:false">修改</a-button>
+            <a-button icon="delete"  style="margin-right:10px;" @click="showConfirm()" :disabled="ischoose==0?true:false">删除</a-button>
+            <a-button icon="laptop"  style="margin-right:10px;" :disabled="ischangeone==0?true:false">权限分配</a-button>
         </div>
         <div >
             <a-table :rowSelection="rowSelection" :columns="columns" :dataSource="data" >
-                <a slot="name" slot-scope="text" href="javascript:;">{{text}}</a>
+                <a slot="id" slot-scope="text" href="javascript:;">{{text}}</a>
             </a-table>
         </div>
-
+        <a-modal
+            :title="title"
+             v-model="add_visible"
+            @ok="roleAdd"
+            okText="保存"
+              keyboard:false
+            cancelText="取消"
+            width='450px'
+            >
+            <div>
+              <div class="graybox">
+                  <ul>
+                    <li  class="flex"  style="margin-bottom:10px;">角色代码<a-input placeholder="请输入角色代码" style="width:250px ;margin-left:10px;"  v-model="id"/></li>
+                    <li  class="flex"  style="margin-bottom:10px;">角色名称<a-input placeholder="请输入角色名称" style="width:250px ;margin-left:10px;"  v-model="name"/></li>
+                    <li  class="flex"  style="margin-bottom:10px;">角色描述<a-input placeholder="请输入角色描述" style="width:250px ;margin-left:10px;"  v-model="remark"/></li>
+                  </ul>
+              </div>
+            </div>
+        </a-modal>
     </div>
 </template>
 
 <script>
+import { getAllRole,addRole,delRole} from "../../api/interface"
 const columns = [{
   title: '角色代码',
-  dataIndex: 'name',
-  scopedSlots: { customRender: 'name' },
+  dataIndex: 'id',
+  scopedSlots: { customRender: 'id' },
 }, {
   title: '角色名称',
-  dataIndex: 'age',
+  dataIndex: 'name',
 }, {
   title: '角色号码',
-  dataIndex: 'address',
+  dataIndex: 'remark',
 }];
-const data = [{
-  key: '1',
-  name: 'John Brown',
-  age: 32,
-  address: '测试测试k',
-}, {
-  key: '2',
-  name: 'Jim Green',
-  age: 42,
-  address: '测试测试k',
-}, {
-  key: '3',
-  name: 'Joe Black',
-  age: 32,
-  address: '测试测试k',
-}];
+
 export default {
-
   data() {
-
     return {
-        data,
       columns,
+      data:[],
+      id:'',
+      name:'',
+      remark:'',
+      add_visible: false,
+      delArray:'',
+      ischangeone:0,
+      title:'新增角色',
+      ischoose:0
     }
   },
  computed: {
-    rowSelection() {
+    rowSelection() {//表格选择计算属性
+      var  self = this;
       const { selectedRowKeys } = this;
       return {
-        onChange: (selectedRowKeys, selectedRows) => {
+        onChange: (selectedRowKeys, selectedRows) => {//点击选择框
+          if(selectedRows.length == 0){
+            self.ischoose = 0;
+          }else{
+            self.ischoose = 1;
+          }
           console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+          self.delArray= '';
+          for(var i in selectedRows){
+              self.delArray += selectedRows[i].id + ',';//选中的选项值拼成字符串
+          }
+          console.log(self.delArray)
+          if(selectedRows.length == 1){//如果只选了一个的时候
+              this.ischangeone = 1;
+              this.id = selectedRows[0].id;
+              this.name = selectedRows[0].name;
+          }else{
+            this.ischangeone = 0;
+          } 
         },
         getCheckboxProps: record => ({
           props: {
@@ -89,10 +117,89 @@ export default {
       }
     }
  },
-  methods: {
-    goTo(){
-          this.$router.push({ path: "/platform" });
+ mounted(){
+   var self = this;
+    getAllRole({
+        pageNo: '1',
+        pageSize :'10'
+      }).then(res => {
+      console.log(res);
+      if(res.returnCode==200){
+          self.data = res.data;
+      }
+    });
+ },
+  methods: {//具体方法
+   openchange(){//打开修改角色的框
+      this.title= '修改角色'
+      this.add_visible = true; 
     },
+    showConfirm() {//询问是否删除
+      var self = this;
+        self.$confirm({
+          title: '是否确认要删除?',
+          content: '按下确认后，所选内容将在1秒钟后删除',
+          okText:'确认',
+          cancelText:'取消',
+            keyboard:false,
+          onOk() {
+            self.roleDelete();//确认删除
+            return new Promise((resolve, reject) => {
+              setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+            }).catch(() => console.log('Oops errors!'));
+          },
+          onCancel() {},
+        });
+      
+     
+    },
+    add_open(){//打开新增角色弹窗
+      this.add_visible = true;
+      this.id = '';
+      this.name = '';
+      this.remark = ''
+    },
+    roleDelete(){
+      var self = this;
+      var tmp = self.delArray;
+      tmp = tmp.substring(0,tmp.length-1);
+      delRole({
+        id:tmp
+      }).then(res=>{
+          console.log(res)
+          setTimeout(function(){
+            getAllRole({
+              pageNo: '1',
+              pageSize :'10'
+            }).then(res => {
+                self.data = res.data;//更新数据
+            }); 
+          },1000)
+      })
+    },
+    roleAdd(){//点击保存新增角色
+      var self = this;
+      addRole({
+        id:self.id,
+        name:self.name,
+        remark:self.remark
+      }).then(res => {
+        if(res.returnCode==200){
+            self.add_visible=false;//添加完毕关闭弹窗
+            setTimeout(function(){
+              getAllRole({
+                pageNo: '1',
+                pageSize :'10'
+              }).then(res => {
+                  self.data = res.data;//更新数据
+              }); 
+            },100)
+        }
+      });
+    },
+    del_role(){
+
+    }
   }
 }
 </script>
