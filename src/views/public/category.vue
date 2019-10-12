@@ -5,54 +5,54 @@
             <li class="flex">
                 
                 类别词中文名称	 
-                <a-input placeholder="请输入类别词中文名称" style="width:150px ;margin-left:10px;"/>
+                <a-input placeholder="请输入类别词中文名称" style="width:150px ;margin-left:10px;" v-model="senglishWord"/>
             </li>
             <li class="flex">
                 词汇英文名称	
-                <a-input placeholder="请输入类别词英文名称"  style="width:150px;margin-left:10px;"/>
+                <a-input placeholder="请输入类别词英文名称"  style="width:150px;margin-left:10px;" v-model="sesglisgAb"/>
             </li>
              <li class="flex">
-                 备注
-                <a-input placeholder="请输入备注"  style="width:150px;margin-left:10px;"/>
+                 中文名称
+                <a-input placeholder="请输入备注"  style="width:150px;margin-left:10px;" v-model="schineseWord"/>
             </li>
-              <a-button icon="search"  style="margin-right:10px;" type="primary">查询</a-button>
-              <a-button icon="close"  style="margin-right:10px;">清空</a-button>
+              <a-button icon="search"  style="margin-right:10px;" type="primary" @click="search">查询</a-button>
+              <a-button icon="close"  style="margin-right:10px;" @click="clear">清空</a-button>
 
         </ul>  
 
 
-        <div class="title" style="margin-top:20px;">所有备注</div>
+        <div class="title" style="margin-top:20px;">所有类别词</div>
         
         <div style="margin-bottom:20px">
-            <a-button icon="edit"  style="margin-right:10px;" @click="addnew">新增</a-button>
-            <a-button icon="delete"  style="margin-right:10px;">删除</a-button>
-            <a-button icon="save"  style="margin-right:10px;">保存</a-button>
+            <a-button icon="plus"  style="margin-right:10px;" @click="addnew">新增</a-button>
+            <a-button icon="edit"  style="margin-right:10px;" @click="openEdit" :disabled="ischangeone==0? true:false">修改</a-button>
+            <a-button icon="delete"  style="margin-right:10px;" @click="showConfirm" :disabled="ischangeone==0?true:false">删除</a-button>
         </div>
           <a-modal
-          title="新增英文单词"
+          :title="title"
           v-model="add_newenglish"
-          @ok="handleOk"
+          @ok="click_categoryWord"
             okText="保存"
             cancelText="取消"
         >
          <ul>
            <li class="flex" style="margin-bottom:10px;justify-content:flex-end;width:85%;  ">
-             英文单词：  <a-input placeholder="请输入英文单词：" style="width:250px ;margin-left:10px;"/>
+             中文名称：  <a-input placeholder="请输入中文名称：" style="width:250px ;margin-left:10px;" v-model="chineseWord"/>
 
            </li>
            <li class="flex" style="margin-bottom:10px;justify-content:flex-end ;width:85%; ">
-            单词缩写：  <a-input placeholder="请输入单词缩写：" style="width:250px ;margin-left:10px;"/>
+            英文全称：  <a-input placeholder="请输入英文全称：" style="width:250px ;margin-left:10px;" v-model="esglisgAb"/>
            </li>
            <li class="flex" style="margin-bottom:10px;justify-content:flex-end ;width:85%;  ">
-             单词中文：  <a-input placeholder="请输入    单词中文：" style="width:250px ;margin-left:10px;"/>
+             英文缩写：  <a-input placeholder="请输入英文缩写：" style="width:250px ;margin-left:10px;" v-model="englishWord"/>
            </li>
            <li class="flex" style="margin-bottom:10px;justify-content:flex-end ;width:85%;  ">
-             单词备注：  <a-input placeholder="请输入单词备注：" style="width:250px ;margin-left:10px;"/>
+             备注：  <a-input placeholder="请输入备注：" style="width:250px ;margin-left:10px;" v-model="remark"/>
            </li>
          </ul>
         </a-modal>
         <div >
-            <a-table  :columns="columns" :dataSource="data" >
+            <a-table  :columns="columns" :dataSource="data" :rowSelection="rowSelection" >
                 <a slot="name" slot-scope="text" href="javascript:;">{{text}}</a>
             </a-table>
         </div>
@@ -60,63 +60,90 @@
 </template>
 
 <script>
+
+import { categoryWord , categoryWordAdd  ,categoryWordEdit , categoryWordDel} from  "../../api/interface"
+
 const columns = [{
-  title: '英文单词',
-  dataIndex: 'name',
-  scopedSlots: { customRender: 'name' },
+  title: '中文名称',
+  dataIndex: 'chineseWord',
+  scopedSlots: { customRender: 'chineseWord' },
 }, {
-  title: '单词缩写',
-  dataIndex: 'age',
+  title: '英文全称',
+  dataIndex: 'englishWord',
 }, {
-  title: '单词中文',
-  dataIndex: 'address',
+  title: '英文缩写',
+  dataIndex: 'esglisgAb',
 },{
-  title: '单词备注',
-  dataIndex: 'address2',
+  title: '备注',
+  dataIndex: 'remark',
 },{
-  title: '操作用户',
-  dataIndex: 'address3',
+  title: '修订人',
+  dataIndex: 'optUser',
 },{
-  title: '操作日期',
-  dataIndex: 'address4',
+  title: '修订时间',
+  dataIndex: 'optDate',
 }];
-const data = [{
-  key: '1',
-  name: 'John Brown',
-  age: 32,
-  address: '测试测试k',
-}, {
-  key: '2',
-  name: 'Jim Green',
-  age: 42,
-  address: '测试测试k',
-}, {
-  key: '3',
-  name: 'Joe Black',
-  age: 32,
-  address: '测试测试kd',
-}, {
-  key: '4',
-  name: 'Joe Black',
-  age: 32,
-  address: '测试测试kg',
-}];
+
 export default {
-
   data() {
-
     return {
-        data,
+      data:[],
       columns,
-      add_newenglish:false
+      title:'新增类别词',
+      add_newenglish:false,
+      //弹窗内input绑定
+      englishWord:'',
+      esglisgAb:'',
+      chineseWord:'',
+      remark:'',
+      //搜索input绑定
+      senglishWord:'',
+      sesglisgAb:'',
+      schineseWord:'',
+      ischangeone:0,//是否只选择了一行数据，0为不是，1是
+      // ischoose:0,//
+      delArray:'',
+      add_click:0,
+      edit_click:0,
+      choseId:''
     }
   },
- computed: {
+  created(){//刚创建时候
+    this.senglishWord='';
+    this.sesglisgAb='';
+    this.schineseWord='';
+    this.showcategoryWor();
+  },
+  computed: {
     rowSelection() {
+      var self = this;
       const { selectedRowKeys } = this;
       return {
         onChange: (selectedRowKeys, selectedRows) => {
           console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+          // if(selectedRows.length == 0){
+          //   self.ischoose = 0;
+          // }else{
+          //   self.ischoose = 1;
+          // }
+          console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+          self.delArray= '';
+          for(var i in selectedRows){
+              self.delArray += selectedRows[i].id + ',';//选中的选项值拼成字符串
+          }
+          console.log(self.delArray)
+          if(selectedRows.length == 1){//如果只选了一个的时候
+            this.ischangeone = 1;
+            this.choseId = selectedRows[0].id;
+            this.englishWord=selectedRows[0].englishWord;
+            this.esglisgAb=selectedRows[0].esglisgAb;
+            this.chineseWord=selectedRows[0].chineseWord;
+            this.remark=selectedRows[0].remark
+            // this.id = selectedRows[0].id;
+            // this.name = selectedRows[0].name;
+          }else{
+            this.ischangeone = 0;
+          } 
         },
         getCheckboxProps: record => ({
           props: {
@@ -126,18 +153,136 @@ export default {
         }),
       }
     }
- },
-   destroyed: function () {
-           console.log("我已经离开了！");
- },
+  },
+  destroyed: function () {
+    // console.log("我已经离开了!");
+  },
   methods: {
-    goTo(){
-          this.$router.push({ path: "/platform" });
+    search(){
+        this.showcategoryWor();
     },
-    addnew(){
+    clear(){//清空搜索条件
+        this.senglishWord='';
+        this.sesglisgAb='';
+        this.schineseWord='';
+    },
+    //展示类别词列表的方法(搜索)
+    showcategoryWor(){
+      var self = this;
+      categoryWord({
+        'pageNo':1,
+        'rowNo':10,
+        'englishWord':self.senglishWord,
+        'esglisgAb':self.sesglisgAb,
+        'chineseWord':self.schineseWord,
+      }).then(res=>{
+        if(res.returnCode==200){//新增成功
+            self.data  = res.data.row;
+        }
+      })
+    },
+    //展示列表方法
+    AddcategoryWord(){
+        var self = this;
+        categoryWordAdd({
+          'englishWord':self.englishWord,
+          'esglisgAb':self.esglisgAb,
+          'chineseWord':self.chineseWord,
+          'remark':self.remark,
+        }).then(res=>{
+          if(res.returnCode==200){//新增成功
+              // self.getList();
+              this.add_newenglish =  false;
+              setTimeout(function(){
+                  self.senglishWord='';
+                  self.sesglisgAb='';
+                  self.schineseWord='';
+                  self.showcategoryWor();
+              },100)
+          }
+        })
+    },
+    editcategoryWord(){//修改类别词方法
+      var self = this;
+      categoryWordEdit({
+          'id':self.choseId,
+          'englishWord':self.englishWord,
+          'esglisgAb':self.esglisgAb,
+          'chineseWord':self.chineseWord,
+          'remark':self.remark
+      }).then(res=>{
+           if(res.returnCode==200){//修改成功
+              // self.getList();
+              this.add_newenglish =  false;
+              setTimeout(function(){
+                   self.senglishWord='';
+                  self.sesglisgAb='';
+                  self.schineseWord='';
+                  self.showcategoryWor();
+              },100)
+          }
+      })
+    },
+    click_categoryWord(){//新增/修改类别词
+      var self = this;
+      if(self.add_click == 1 && self.edit_click == 0){//新增
+        self.AddcategoryWord();
+      }else if(self.add_click == 0 && self.edit_click == 1){//修改
+        self.editcategoryWord();
+      }
+    },
+    openEdit(){//打开修改弹窗
+      this.add_newenglish =  true;
+      this.title = '修改类别词',
+      this.add_click = 0;
+      this.edit_click =1;
+    },
+    
+    addnew(){//打开新增弹窗
         this.add_newenglish =  true;
+        this.title = '新增类别词';
+        this.englishWord = '';
+        this.esglisgAb = '';
+        this.chineseWord = '';
+        this.remark = '';
+        this.add_click = 1;
+        this.edit_click = 0;
     },
-      handleOk(e) {
+    // 打开删除弹窗
+    showConfirm() {//询问是否删除
+      var self = this;
+        this.$confirm({
+          title: '是否确认要删除?',
+          content: '按下确认后，所选内容将在1秒钟后删除',
+          okText:'确认',
+          cancelText:'取消',
+          keyboard:false,
+          onOk() {
+            self.delWord();
+            return new Promise((resolve, reject) => {
+              setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+            }).catch(() => console.log('Oops errors!'));
+          },
+          onCancel() {},
+        });
+     
+    },
+    delWord(){//删除类别词
+     var self = this;
+      var tmp = self.delArray;
+      tmp = tmp.substring(0,tmp.length-1);
+      categoryWordDel({
+        'categoryWordId':tmp
+      }).then(res=>{
+        setTimeout(function(){
+               self.senglishWord='';
+              self.sesglisgAb='';
+              self.schineseWord='';
+              self.showcategoryWor();
+          },100)
+      });
+    },
+    handleOk(e) {
       this.ModalText = 'The modal will be closed after two seconds';
       this.confirmLoading = true;
       setTimeout(() => {

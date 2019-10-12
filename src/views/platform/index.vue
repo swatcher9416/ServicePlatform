@@ -82,7 +82,7 @@ export default {
         localStorage.removeItem('pword');
         localStorage.removeItem('pesb');
         localStorage.removeItem('pnote');
-         localStorage.removeItem('pclassify ');
+         localStorage.removeItem('pclassify');
   },
   methods: {
     //  add () {
@@ -226,7 +226,6 @@ export default {
         this.activeKey = activeKey;
         this.$router.push( "/platform/word")
         localStorage.pword = activeKey;
-
       }
       else{
           this.activeKey =  localStorage.pword ;
