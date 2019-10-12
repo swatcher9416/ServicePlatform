@@ -46,11 +46,23 @@
                 <a slot="j_id" slot-scope="text" href="javascript:;">{{text}}</a>
             </a-table>
         </div>
-
+        <a-modal 
+         title="预览节点"
+          width='1100px'
+         :visible="vfd_show"
+          keyboard:false
+          footer:false
+        >
+             <vfd></vfd>
+        </a-modal>
+ 
     </div>
 </template>
 
 <script>
+
+    import vfd from 'vfd'
+
 const columns = [
   {
     title: '接口ID',
@@ -117,9 +129,12 @@ export default {
       data,
       columns,
       visible: false,
+      vfd_show:false
     }
   },
-
+  components:{
+        vfd
+  },
  computed: {
     rowSelection() {
       const { selectedRowKeys } = this;
@@ -150,7 +165,8 @@ export default {
     },
     preview(){
       console.log('预览');
-      this.$emit('createV','我要创建一个东西')
+      // this.$emit('createV','我要创建一个东西
+      this.vfd_show = true;
     }
   }
 }

@@ -266,7 +266,6 @@ export default {
                 },100)
               }
             });
-         
         }else if(self.addclick ==0 && self.editclick==1){
           editOrg({//如果是编辑
               orgId:self.orgId,
@@ -277,10 +276,10 @@ export default {
               orgRemark:self.orgRemark
           }).then(res=>{
               if(res.returnCode==200){
-                   self.add_visible=false;
-            setTimeout(function(){
-                self.allorglist();
-            },100)
+                self.add_visible=false;
+                setTimeout(function(){
+                    self.allorglist();
+                },100)
               }
           })
         }

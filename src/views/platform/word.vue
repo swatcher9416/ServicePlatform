@@ -23,24 +23,57 @@
         <div style="margin-bottom:20px">
             <a-button icon="plus"  style="margin-right:10px;" @click="open">新增</a-button>
             <a-button icon="edit"  style="margin-right:10px;" @click="edit" :disabled="ischangeone==0? true:false">修改</a-button>
-            <a-button icon="delete"  style="margin-right:10px;" @click="del" :disabled="ischoose==0?true:false">删除</a-button>
+            <a-button icon="delete"  style="margin-right:10px;" @click="showConfirm" :disabled="ischoose==0?true:false">删除</a-button>
         </div>
         <div >
             <a-table :rowSelection="rowSelection" :columns="columns" :dataSource="data" >
-               <editable-cell :text="text" @change="onCellChange(record.key, 'name', $event)"/>
+               <!-- <editable-cell :text="text" @change="onCellChange(record.key, 'name', $event)"/> -->
                 <!-- <a slot="name" slot-scope="text" href="javascript:;">{{text}}</a> -->
+              <a slot="name" slot-scope="text" href="javascript:;">{{text}}</a>
+              
+              <span slot="action" slot-scope="text,record">
+                <a href="javascript:;" @click="addParams(record.id)" >[添加参数]</a>
+                <a-divider type="vertical" />
+                <a href="javascript:;" @click="editParams(record.id)">[修改参数]</a>
+              </span>
             </a-table>
         </div>
+    <!--这里是添加字段参数的弹窗-->
+          <a-modal
+          title="添加参数"
+          v-model="addnewParams"
+          @ok="saveAttr"
+          okText="保存"
+          cancelText="取消"
+        >
+         <ul>
+           <li class="flex" style="margin-bottom:10px;justify-content:flex-end;width:85%;">
+             参数名称：  <a-input placeholder="请输入参数名称" style="width:250px ;margin-left:10px;0 " v-model="parmName"/>
+           </li>
+           <li class="flex" style="margin-bottom:10px;justify-content:flex-end ;width:85%; ">
+             默认值： <a-input placeholder="请输入默认值" style="width:250px ;margin-left:10px;" v-model="defaultValue"/>
+           </li>
+           <li class="flex" style="margin-bottom:10px;justify-content:flex-end ;width:85%;">
+             序号：  <a-input placeholder="请输入序号" style="width:250px ;margin-left:10px;" v-model="xNo"/>
+           </li>
+            <li class="flex" style="margin-bottom:10px;justify-content:flex-end ;width:85%;">
+             描述：  <a-input placeholder="请输入描述" style="width:250px ;margin-left:10px;" v-model="paramDesc"/>
+           </li>
+         </ul>
+        </a-modal>
+
+
+    <!--这里是添加字段的弹窗-->
 
           <a-modal
-          title="新增字段处理"
+          :title="title"
           v-model="add_visible"
           @ok="save"
           okText="保存"
           cancelText="取消"
         >
          <ul>
-           <li class="flex" style="margin-bottom:10px;justify-content:flex-end;width:85%;  ">
+           <li class="flex" style="margin-bottom:10px;justify-content:flex-end;width:85%;">
              中文名称：  <a-input placeholder="请输入中文名称" style="width:250px ;margin-left:10px;0 " v-model="chineseName"/>
            </li>
            <li class="flex" style="margin-bottom:10px;justify-content:flex-end ;width:85%; ">
@@ -49,49 +82,95 @@
            <li class="flex" style="margin-bottom:10px;justify-content:flex-end ;width:85%;  ">
              描述：  <a-input placeholder="请输入描述" style="width:250px ;margin-left:10px;" v-model="desc"/>
            </li>
+  
          </ul>
+        </a-modal>
+
+        <a-modal
+          title="参数列表"
+          v-model="attrPshow"
+          :footer="null"	
+        >
+
+          <div style="margin-bottom:10px;">
+            <a-button icon="close" >删除</a-button>
+
+          </div>
+           <a-table :rowSelection="rowSelection" :columns="attrColumns" :dataSource="attrData" >
+              <a slot="attrParamName" slot-scope="text" href="javascript:;">{{text}}</a>
+            </a-table>
         </a-modal>
     </div>
 </template>
 
 <script>
 
-import {addAttr,findAttr } from "../../api/interface"
+import {addAttr,findAttr,attFuncParam,deleteAttr,getParams} from "../../api/interface"
 // import EditableCell from './EditableCell'
 const columns = [{
   title: '中文名称',
-  dataIndex: 'name',
-  scopedSlots: { customRender: 'name' },
+  dataIndex: 'funcName',
+  scopedSlots: { customRender: 'funcName' },
 }, {
   title: '名称',
-  dataIndex: 'funcName',
+  dataIndex: 'name',
 }, {
   title: '参数',
-  dataIndex: '',
+  dataIndex: 'params',
 },{
   title: '说明',
   dataIndex: 'des',
 },{
   title: '操作',
-  dataIndex: '',
+  key: 'action',
+  scopedSlots: { customRender: 'action' },
 }];
+
+const attrColumns = [{
+  title: '参数名称',
+  dataIndex: 'attrParamName',
+  scopedSlots: { customRender: 'attrParamName' },
+},{
+  title: '默认值',
+  dataIndex: 'defaultValue',
+},
+{
+  title: '排序',
+  dataIndex: 'no',
+},
+{
+  title: '说明',
+  dataIndex: 'explain',
+}
+]
 
 export default {
   data() {
     return {
       data:[],//表格数据
+      attrData:[],//字段表格数据
       columns,
+      attrColumns,
+      title:'新增字段',
       add_visible:false,//控制弹窗显示的变量
       chineseName:'',
       name:'',
       desc:'',
+      attrPshow:false,
       //查询绑定
       searchCnName:'',
       searchName:'',
       searchdesc:'',
       ischangeone:0,
       ischoose:0,
-      delArray:''
+      delArray:'',
+      addnewParams:false,//新增字段弹窗控制
+      //增添字段对应值
+      parmName:'',
+      defaultValue:'',
+      xNo:'',
+      paramDesc:'',
+      attFunctionId:''
     }
   },
   //  components: {
@@ -140,6 +219,7 @@ export default {
  },
   methods: {
     open(){
+      var self = this;
       this.add_visible = true;
       self.chineseName='',
       self.name='',
@@ -159,8 +239,66 @@ export default {
           }
       })
     },
+    getAllattrParams(id){
+      var self = this;
+      getParams({
+        attFunctionId:id
+      }).then(res=>{
+          if(res.returnCode==200){
+            self.attrData = res.data.rows;
+          }
+      })
+    },
     edit(){
       this.add_visible = true;
+
+    },
+    // 打开添加字段参数弹窗
+    addParams(id){
+      this.addnewParams = true;
+      this.parmName = '';
+      this.defaultValue = '';
+      this.xNo = '';
+      this.paramDesc = '';
+      this.attFunctionId = id;
+      this.title = '新增字段';
+    },
+    editParams(id){
+      this.attrPshow = true;
+      this.title = '修改字段';
+      this.getAllattrParams(id);
+    },
+    del(){
+
+    },
+    saveAttr(){//保存添加
+      var self =this;
+      var attrJson = [
+        {
+         "name":this.parmName,
+          "defaultValue":this.defaultValue,
+          "seq":this.xNo,
+          "funcId":this.attFunctionId
+        }
+      ];
+
+      console.log(JSON.stringify(attrJson))
+      attFuncParam({//添加字段方法
+        attFuncParam:attrJson,
+         name:this.parmName,
+          defaultValue:this.defaultValue,
+          seq:this.xNo,
+          funcId:this.attFunctionId
+       
+      }).then(res=>{
+        if(res.returnCode == 200){//添加成功
+          //更新下表格
+          self.addnewParams = false;
+          setTimeout(function(){  
+            self.getAllattr();
+          },100)
+        }
+      })
     },
     save(){
       var attrJson = [
@@ -171,18 +309,49 @@ export default {
         }
       ];
       var self =this;
-      addAttr({
-        
+      addAttr({//添加字段方法
         name:self.name,
         funcName:self.chineseName,
         des:self.desc,
-        attFunction:attrJson
+        attFunction:JSON.stringify(attrJson)
       }).then(res=>{
         if(res.returnCode==200){//添加成功
           //更新下表格
           self.add_visible = false;
+
+          setTimeout(function(){  
+                self.getAllattr();
+              },100)
         }
       })
+    },
+
+    attrDelete(){//用户删除方法
+      var self = this;
+      var tmp = self.delArray;
+      tmp = tmp.substring(0,tmp.length-1);//去除字符串最后面的逗号
+      deleteAttr({
+        functionIds:tmp
+      }).then(res=>{
+          console.log(res)
+          setTimeout(function(){
+              self.getAllattr();
+          },1000)
+      })
+    },
+     showConfirm() {//删除
+      var self = this;
+      this.$confirm({
+        title: '提示',
+        content: '确定要删除选中数据？',
+        onOk() {
+          self.attrDelete();
+          return new Promise((resolve, reject) => {
+            setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
+          }).catch(() => console.log('Oops errors!'));
+        },
+        onCancel() {},
+      });
     }
   }
 }

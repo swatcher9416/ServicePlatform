@@ -21,7 +21,7 @@
               <conditioSearch v-if="pane.key=='/transactionLink'"></conditioSearch>
           <keep-alive v-else>
             <div></div>
-            <router-view @createP="pointprotect" @createV="preview">
+            <router-view @createP="pointprotect">
 
               
             </router-view>
@@ -115,6 +115,7 @@ export default {
           this.activeKey = activeKey;
           this.$router.push(activeKey);
           localStorage.preview = activeKey;
+          console.log('创建预览成功')
         }else{
             this.activeKey =  localStorage.preview ;
             this.$router.push( localStorage.preview);

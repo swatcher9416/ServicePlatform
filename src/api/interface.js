@@ -55,20 +55,20 @@ export const editUser = data => {
 };
 
 //获取用户信息（比对密码）
-export const get = data => {
+export const getByPW = params => {
   return axios({
     url: "/user/getByPW",
     method: "Get",
-    data
+    params
   });
 };
 
 //修改密码
-export const  changePassword = data => {
+export const  changePassword = params => {
   return axios({
     url: "/user/passWord",
-    method: "Get",
-    data
+    method: "Post",
+    params
   });
 };
 
@@ -231,6 +231,34 @@ export const findAttr = params =>{
   })
 }
 
+//根据id删除字段/ attFunction /deletes
+export const deleteAttr = params =>{
+  return axios({
+    url: "/attFunction/deletes",
+    method: "Delete",
+    params
+  })
+}
+
+
+//添加字段参数/ attFuncParam /add
+export const attFuncParam = data =>{
+  return axios({
+    url: "/attFuncParam/add",
+    method: "Post",
+    data
+  })
+}
+
+//根据字段处理方法id查询参数
+export const getParams = params =>{
+  return axios({
+    url: "/attFuncParam/getByFuncId",
+    method: "Get",
+    params
+  })
+}
+
 
 
 //ESB服务器管理  获取服务器列表/esbServer/getServerList
@@ -285,12 +313,136 @@ export const getGeneratorList = data =>{//查询所有
   })
 }
 
+// 英文单词及缩写/englishWord/query
+export const englishWord = data =>{//查询所有英文单词
+  return axios({
+    url: "/englishWord/query",
+    method: "Post",
+    data
+  })
+}
+
+
+// 新增英文单词
+export const englishWordAdd = data =>{//查询所有
+  return axios({
+    url: "/englishWord/add",
+    method: "Post",
+    data
+  })
+}
+
+
+//修改英文单词
+export const englishWordEdit = data =>{//查询所有
+  return axios({
+    url: "/englishWord/modify",
+    method: "Post",
+    data
+  })
+}
+
+//删除英文单词
+export const englishWordDel = params =>{//查询所有
+  return axios({
+    url: "/englishWord/delete",
+    method: "Post",
+    params
+  })
+}
+
+
+
+//查询所类别词
+export const categoryWord = data =>{
+  return axios({
+    url: "/categoryWord/query",
+    method: "Post",
+    data
+  })
+}
+
+
+//新增类别词
+export const categoryWordAdd = data =>{//新增
+  return axios({
+    url: "/categoryWord/add",
+    method: "Post",
+    data
+  })
+}
+
+
+//修改类别词
+export const categoryWordEdit = data =>{//修改
+  return axios({
+    url: "/categoryWord/modify",
+    method: "Post",
+    data
+  })
+}
+
+
+
+
+//批量删除类别词
+
+export const categoryWordDel = params =>{//不支持批量
+  return axios({
+    url: "/categoryWord/delete",
+    method: "Post",
+    params
+  })
+}
+
+// 根据条件查询元数据metadata/queryAll
+export const metadataList = data =>{
+  return axios({
+    url: "/metadata/queryAll",
+    method: "Post",
+    data
+  })
+}
+
+
+
+// 新增元数据
+export const metadataAdd = data =>{
+  return axios({
+    url: "/metadata/add",
+    method: "Post",
+    data
+  })
+}
+
+// 修改元数据
+export const metadataEdit = params =>{
+  return axios({
+    url: "/metadata/modify",
+    method: "Post",
+    params
+  })
+}
+
+//删除元数据
+export const metadataDelete = params =>{
+  return axios({
+    url: "/metadata/deletes",
+    method: "Post",
+    params
+  })
+}
+
+
+
 
 export default {
   getAllUser,//获取全部用户
   addUser,//新增用户
   assignRoles,//添加用户角色关系
   editUser,//修改用户
+  getByPW,//比对密码
+  changePassword,//修改密码
   searchquery,//搜索用户
   addOrg,//增加机构
   deleteOrg,//删除机构
@@ -304,12 +456,30 @@ export default {
   getAllRole,//获取角色列表
   delRole,//删除角色
   addRole,//添加角色
-  findAttr,//查询字段
-  addAttr,//添加字段
+  findAttr,//查询字段方法
+  addAttr,//添加字段方法
+  deleteAttr,//根据id删除字段，可多选删除
+  attFuncParam,//添加字段
+  getParams,//根据字段处理方法id查询参数
   getServerList,//获取esb服务器列表
   addesbServer,//添加服务器
   delesbServer,// 删除服务器
   getsystemLog,//获取系统日志，
   addGenerator,//新增生成类
-  getGeneratorList//获取生成类列表
+  getGeneratorList,//获取生成类列表
+  // 公共平台部分
+  englishWord,// 英文单词及缩写管理
+  englishWordAdd,//添加英文单词
+  englishWordEdit,//修改英文单词
+  englishWordDel,//删除英文单词
+  categoryWord,//搜索类别词
+  categoryWordAdd,//添加类别词
+  categoryWordEdit,//修改类别词
+  // categoryWordAll,//获取所有的类别词
+  categoryWordDel,//删除类别词
+  metadataList,//查询元数据
+  metadataAdd,//新增元数据
+  metadataEdit,//修改元数据
+  metadataDelete,//删除元数据
+ 
 };

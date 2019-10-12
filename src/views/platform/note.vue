@@ -24,7 +24,7 @@
             <a-button icon="delete"  style="margin-right:10px;">删除</a-button>
         </div> -->
         <div >
-            <a-table :rowSelection="rowSelection" :columns="columns" :dataSource="data" >
+            <a-table :rowSelection="rowSelection" :columns="columns" :dataSource="data" :pagination="{ pageSize: 10 }">
                 <a slot="name" slot-scope="text" href="javascript:;">{{text}}</a>
             </a-table>
         </div>
@@ -67,6 +67,7 @@ export default {
     return {
       data:[],
       columns,
+      pageSize:0
     }
   },
  computed: {
@@ -93,13 +94,14 @@ export default {
         var self = this;
         getsystemLog({
           pageNo:1,
-          pageSize:10,
+          pageSize:1000,
           optUser:'',
           startDate:'',
           endDate:''
         }).then(res=>{
           if(res.returnCode==200){
-            self.data = res.data.rows
+            self.data = res.data.rows;
+            // self.pageSize = res.data.total;
           }
         })
       },
