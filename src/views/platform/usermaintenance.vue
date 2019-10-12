@@ -18,7 +18,6 @@
                 </a-select>
 
             </li>
-     
             <li class="flex">
                 用户状态
                 <a-select style="width: 120px;margin-left:10px;"  @change="handleSearchChange" v-model="search_state">
@@ -40,7 +39,7 @@
             <a-button icon="edit"  style="margin-right:10px;"  @click="openchange" :disabled="ischangeone==0? true:false">修改</a-button>
             <a-button icon="delete"  style="margin-right:10px;" @click="showConfirm" :disabled="ischoose==0?true:false">删除</a-button>
             <a-button icon="laptop"  style="margin-right:10px;"  @click="changePass" :disabled="ischangepassone==0?true:false">修改密码</a-button>
-            <a-button icon="laptop"  style="margin-right:10px;" :disabled="isintpassone==0?true:false">初始化密码</a-button>
+            <a-button icon="laptop"  style="margin-right:10px;" :disabled="isintpassone==0?true:false" @click="init_pass">初始化密码</a-button>
         </div>
         <a-modal
             :title="title"
@@ -85,19 +84,19 @@
         <a-modal
           title="修改密码"
           v-model="changepass_visible"
-          @ok="handleOk"
+          @ok="c_pass"
           okText="保存"
           cancelText="取消"
         >
          <ul>
            <li class="flex" style="margin-bottom:10px;justify-content:flex-end;width:85%;  ">
-             旧密码：  <a-input placeholder="请输入旧密码：" style="width:250px ;margin-left:10px;"/>
+             旧密码：  <a-input placeholder="请输入旧密码：" style="width:250px ;margin-left:10px;" v-model="old_pass"/>
            </li>
            <li class="flex" style="margin-bottom:10px;justify-content:flex-end ;width:85%; ">
-             新密码：  <a-input placeholder="请输入新密码：" style="width:250px ;margin-left:10px;"/>
+             新密码：  <a-input placeholder="请输入新密码：" style="width:250px ;margin-left:10px;" v-model="new_pass"/>
            </li>
            <li class="flex" style="margin-bottom:10px;justify-content:flex-end ;width:85%;  ">
-             确认密码：  <a-input placeholder="请输入确认密码：" style="width:250px ;margin-left:10px;"/>
+             确认密码：  <a-input placeholder="请输入确认密码：" style="width:250px ;margin-left:10px;" v-model="com_pass"/>
            </li>
          </ul>
         </a-modal>
@@ -106,14 +105,13 @@
             <a-table :rowSelection="rowSelection" :columns="columns" :dataSource="data" >
                 <a slot="name" slot-scope="text" href="javascript:;">{{text}}</a>
             </a-table>
-        </div>
-     
+        </div>     
 
     </div>
 </template>
 
 <script>
-import { getAllUser,addUser,getAllRole,getAllOrg,deleteUser,editUser, editOrg,searchquery,assignRoles } from "../../api/interface"
+import { getAllUser,addUser,getAllRole,getAllOrg,deleteUser,editUser, editOrg,searchquery,assignRoles,changePassword,getByPW} from "../../api/interface"
 
 const columns_modal=[{//新增用户内的表格的表头数据
    title: '角色名',
@@ -176,7 +174,6 @@ export default {
       password:'',
       state:'',
       remark:'',
-      password:'',
       //新增用户的几个参数end
       ischangeone:0,
       title:'新增用户',
@@ -197,7 +194,13 @@ export default {
       search_org:'',
       search_state:'',
       delArray:'',
-      addRole:''
+      addRole:'',
+      //修改密码
+      old_pass:'',
+      new_pass:'',
+      com_pass:'',
+      choseOneId:'',//选中改的人
+      orgin_pass:''
     }
   },
   created(){
@@ -213,6 +216,7 @@ export default {
           self.delArray= '';
           if(selectedRows.length == 0){
             self.ischoose = 0;
+            
           }else{
             self.ischoose = 1;
           }
@@ -226,15 +230,14 @@ export default {
               this.isintpassone = 1;
               this.user_id = selectedRows[0].id;//id
               this.user_code = selectedRows[0].name;//名称
-     
               this.orgSelect =  selectedRows[0].orgId ; //机构
               console.log( '现在的机构是'+this.orgSelect )
-
               this.password = selectedRows[0].password;
               this.cellphone = selectedRows[0].userMobile;
               this.telphone = selectedRows[0].userTel;
               this.email = selectedRows[0].email;
               this.stateSelect =  selectedRows[0].status;
+              this.choseOneId = selectedRows[0].id
               // if(selectedRows[0].status=="0"){
               //     this.stateSelect = "正常使用";
               // }else{
@@ -299,6 +302,45 @@ export default {
     });
  },
   methods: {
+    init_pass(){//初始化密码
+      let self = this;
+       changePassword({
+          userId:self.choseOneId,
+          passWord:123456//初始密码
+        }).then(res=>{
+          if(res.returnCode==200){//密码修改成功
+            self.$message.success('初始化密码成功');
+            self.changepass_visible = false;
+          }
+        })
+    },
+    c_pass(){//点击保存新密码
+     let self = this;
+     if(self.orgin_pass != self.old_pass){
+        self.$message.warning('您输入的密码与旧密码不一致');
+     }else{//一致
+      //校验新密码
+      if(self.new_pass==self.old_pass){
+          self.$message.warning('新密码不能和旧密码一样！');
+      } else{
+        if(self.new_pass!=self.com_pass){
+          self.$message.warning('新密码输入不一致！');
+        }else{
+             changePassword({
+              userId:self.choseOneId,
+              passWord:self.new_pass
+            }).then(res=>{
+              if(res.returnCode==200){//密码修改成功
+                self.$message.success('修改密码成功');
+                self.changepass_visible = false;
+              }
+            })
+        }
+       
+      }
+     }
+     
+    },
     searchUser(){
       var self = this;
       searchquery({ 
@@ -422,8 +464,6 @@ export default {
       }else if(self.add_click == 0 && self.edit_click == 1){//修改用户
           self.edit_User();
       }
-     
-
     },
     showModal() {
       this.visible = true;
@@ -475,7 +515,7 @@ export default {
                         res.data.rows[i].status = "已经离职";
                       }
                     }
-                  self.data = res.data.rows;
+                    self.data = res.data.rows;
 
                   }
                   console.log(self.data,111)
@@ -497,8 +537,20 @@ export default {
         onCancel() {},
       });
     },
-    changePass(){
-        this.changepass_visible = true
+    changePass(){//打开修改密码的弹窗
+      //先清空之前修改的密码数据
+      this.old_pass='';
+      this.new_pass='';
+      this.com_pass='';
+      let self = this;
+      this.changepass_visible = true;
+      getByPW({
+        userId:this.choseOneId
+      }).then(res=>{
+        if(res.returnCode==200){
+          self.orgin_pass =  res.data.password;//获取到了选中对象的初始密码
+        }
+      });
     }
   }
 }
